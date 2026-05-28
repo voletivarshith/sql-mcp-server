@@ -138,18 +138,12 @@ Add to your MCP client config (e.g., Claude Desktop `claude_desktop_config.json`
 
 ```json
 {
-  "mcpServers": {
-    "sql-mcp-server": {
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/sql-mcp-server", "python", "src/server.py"],
-      "env": {
-        "DB_ENGINE": "mysql",
-        "MYSQL_USER": "root",
-        "MYSQL_PASSWORD": "",
-        "MYSQL_DATABASE": "mydb"
-      }
-    }
-  }
+	"servers": {
+		"sql-mcp-server": {
+			"url": "http://127.0.0.1:8000/mcp",
+			"type": "http",
+		},
+	}
 }
 ```
 
