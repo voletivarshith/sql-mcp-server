@@ -1,0 +1,13 @@
+[project]
+name = "sql-mcp-server"
+version = "0.1.0"
+description = "MCP server for MySQL and PostgreSQL database operations"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.27.1",
+    "pymysql>=1.1.0",
+    "asyncpg>=0.30.0",
+    "python-dotenv>=1.1.0",
+    "pydantic>=2.0.0",
+]
