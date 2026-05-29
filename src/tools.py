@@ -111,13 +111,11 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
 
         try:
             result = await execute(query, db)
+            logger.info("[create_table] ✔ Created table '%s' in db='%s'", table_name, db)
             return _format_result(result, query)
         except Exception as e:
+            logger.error("[create_table] ✗ Failed: %s", e)
             return _error(str(e), query=query)
-
-    # -----------------------------------------------------------------------
-    # ALTER — DDL
-    # -----------------------------------------------------------------------
     @mcp.tool()
     async def alter_sql(
         ctx: Context,
@@ -152,12 +150,15 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 schema=ConfirmAction,
             )
             if resp.action != "accept" or not resp.data or not resp.data.confirm:
+                logger.warning("[alter_sql] User cancelled ALTER with DROP")
                 return _error("ALTER cancelled by user.", status="cancelled")
 
         try:
             result = await execute(query, db)
+            logger.info("[alter_sql] ✔ Executed: %s", query[:100])
             return _format_result(result, query)
         except Exception as e:
+            logger.error("[alter_sql] ✗ Failed: %s", e)
             return _error(str(e), query=query)
 
     # -----------------------------------------------------------------------
@@ -227,8 +228,10 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 schema=ConfirmDrop,
             )
             if resp.action != "accept" or not resp.data:
+                logger.warning("[update_sql] User cancelled UPDATE (no WHERE)")
                 return _error("UPDATE cancelled.", status="cancelled")
             if not resp.data.confirm or resp.data.type_to_confirm != "DROP":
+                logger.warning("[update_sql] User failed confirmation (no WHERE)")
                 return _error("Confirmation failed.", status="cancelled")
         else:
             resp = await ctx.elicit(
@@ -236,12 +239,15 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 schema=ConfirmAction,
             )
             if resp.action != "accept" or not resp.data or not resp.data.confirm:
+                logger.warning("[update_sql] User cancelled UPDATE")
                 return _error("UPDATE cancelled.", status="cancelled")
 
         try:
             result = await execute(final_query, db)
+            logger.info("[update_sql] ✔ Executed: %s", final_query[:100])
             return _format_result(result, final_query)
         except Exception as e:
+            logger.error("[update_sql] ✗ Failed: %s", e)
             return _error(str(e), query=final_query)
 
     # -----------------------------------------------------------------------
@@ -294,8 +300,10 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 schema=ConfirmDrop,
             )
             if resp.action != "accept" or not resp.data:
+                logger.warning("[delete_sql] User cancelled destructive operation")
                 return _error("Cancelled.", status="cancelled")
             if not resp.data.confirm or resp.data.type_to_confirm != "DROP":
+                logger.warning("[delete_sql] User failed confirmation for destructive operation")
                 return _error("Confirmation failed.", status="cancelled")
         else:
             resp = await ctx.elicit(
@@ -303,12 +311,15 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 schema=ConfirmAction,
             )
             if resp.action != "accept" or not resp.data or not resp.data.confirm:
+                logger.warning("[delete_sql] User cancelled DELETE")
                 return _error("DELETE cancelled.", status="cancelled")
 
         try:
             result = await execute(query, db)
+            logger.info("[delete_sql] ✔ Executed: %s", query[:100])
             return _format_result(result, query)
         except Exception as e:
+            logger.error("[delete_sql] ✗ Failed: %s", e)
             return _error(str(e), query=query)
 
     # -----------------------------------------------------------------------
@@ -340,8 +351,10 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
 
         try:
             result = await execute(query, db)
+            logger.info("[insert_sql] ✔ Inserted rows: %d", result.row_count)
             return _format_result(result, query)
         except Exception as e:
+            logger.error("[insert_sql] ✗ Failed: %s", e)
             return _error(str(e), query=query)
 
     # -----------------------------------------------------------------------
@@ -390,6 +403,7 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[select_query] ✗ Failed: %s", e)
             return _error(str(e), query=final_query)
 
     # -----------------------------------------------------------------------
@@ -436,6 +450,7 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[describe_table] ✗ Failed: %s", e)
             return _error(str(e), query=query)
 
     # -----------------------------------------------------------------------
@@ -474,6 +489,7 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[explain_query] ✗ Failed: %s", e)
             return _error(str(e), query=final_query)
 
     # -----------------------------------------------------------------------
@@ -514,4 +530,5 @@ def register_tools(mcp, execute: ExecuteFn, default_database: str) -> None:
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[explain_analyze] ✗ Failed: %s", e)
             return _error(str(e), query=final_query)

@@ -44,6 +44,7 @@ def register_mysql_resources(mcp, execute: ExecuteFn, default_database: str) -> 
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] mysql_show_tables failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://mysql/{database}/tables/{table_name}/describe")
@@ -63,6 +64,7 @@ def register_mysql_resources(mcp, execute: ExecuteFn, default_database: str) -> 
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] mysql_describe_table failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://mysql/databases")
@@ -78,6 +80,7 @@ def register_mysql_resources(mcp, execute: ExecuteFn, default_database: str) -> 
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] mysql_show_databases failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://mysql/{database}/query/{select_query}")
@@ -104,6 +107,7 @@ def register_mysql_resources(mcp, execute: ExecuteFn, default_database: str) -> 
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] mysql_select failed: %s", e)
             return _error(str(e), query=select_query)
 
     @mcp.resource("db://mysql/{database}/explain-analyze/{query_str}")
@@ -128,6 +132,7 @@ def register_mysql_resources(mcp, execute: ExecuteFn, default_database: str) -> 
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] mysql_explain_analyze failed: %s", e)
             return _error(str(e), query=final_query)
 
 # ---------------------------------------------------------------------------
@@ -157,6 +162,7 @@ def register_pg_resources(mcp, execute: ExecuteFn, default_database: str) -> Non
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] pg_show_tables failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://postgresql/{database}/tables/{table_name}/describe")
@@ -182,6 +188,7 @@ def register_pg_resources(mcp, execute: ExecuteFn, default_database: str) -> Non
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] pg_describe_table failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://postgresql/databases")
@@ -198,6 +205,7 @@ def register_pg_resources(mcp, execute: ExecuteFn, default_database: str) -> Non
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] pg_show_databases failed: %s", e)
             return _error(str(e))
 
     @mcp.resource("db://postgresql/{database}/query/{select_query}")
@@ -224,6 +232,7 @@ def register_pg_resources(mcp, execute: ExecuteFn, default_database: str) -> Non
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] pg_select failed: %s", e)
             return _error(str(e), query=select_query)
 
     @mcp.resource("db://postgresql/{database}/explain-analyze/{query_str}")
@@ -248,4 +257,5 @@ def register_pg_resources(mcp, execute: ExecuteFn, default_database: str) -> Non
                 "execution_time_ms": result.execution_time_ms,
             }, indent=2, default=str)
         except Exception as e:
+            logger.error("[resource] pg_explain_analyze failed: %s", e)
             return _error(str(e), query=final_query)

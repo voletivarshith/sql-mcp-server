@@ -75,8 +75,10 @@ _VALID_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.`\"]*$")
 def check_injection(query: str) -> str | None:
     """Return error message if query contains injection patterns, else None."""
     if _INJECTION_PATTERN.search(query):
+        logger.warning("[INJECTION] Blocked query: %s", query[:200])
         return "Query rejected: potential SQL injection detected."
     if query.count(";") > 1:
+        logger.warning("[INJECTION] Multiple statements blocked: %s", query[:200])
         return "Query rejected: multiple statements not allowed."
     return None
 
@@ -84,6 +86,7 @@ def check_injection(query: str) -> str | None:
 def validate_identifier(name: str) -> str | None:
     """Return error if identifier is invalid, else None."""
     if not _VALID_IDENTIFIER.match(name):
+        logger.warning("[VALIDATION] Invalid identifier rejected: '%s'", name)
         return f"Invalid identifier: '{name}'. Only letters, digits, underscores, and dots allowed."
     return None
 
@@ -116,6 +119,9 @@ def _run_mysql_query(query: str, database: str | None = None) -> QueryResult:
                 row_count=cur.rowcount,
                 execution_time_ms=round(elapsed_ms, 2),
             )
+    except Exception as e:
+        logger.error("[MySQL] Query failed: %s | error=%s", query[:200], e)
+        raise
     finally:
         conn.close()
 
@@ -128,6 +134,7 @@ async def execute_mysql(query: str, database: str | None = None) -> QueryResult:
 def ping_mysql() -> None:
     """Verify MySQL connectivity by opening a connection and pinging."""
     config = get_mysql_config()
+    logger.debug("[MySQL] Pinging host=%s port=%s db=%s", config["host"], config["port"], config["database"])
     conn = pymysql.connect(**config)
     try:
         conn.ping(reconnect=False)
@@ -170,6 +177,9 @@ async def execute_pg(query: str, database: str | None = None) -> QueryResult:
             row_count=row_count,
             execution_time_ms=round(elapsed_ms, 2),
         )
+    except Exception as e:
+        logger.error("[PG] Query failed: %s | error=%s", query[:200], e)
+        raise
     finally:
         await conn.close()
 
@@ -177,5 +187,6 @@ async def execute_pg(query: str, database: str | None = None) -> QueryResult:
 async def ping_pg() -> None:
     """Verify PostgreSQL connectivity by opening and closing a connection."""
     config = get_pg_config()
+    logger.debug("[PG] Pinging host=%s port=%s db=%s", config["host"], config["port"], config["database"])
     conn = await asyncpg.connect(**config)
     await conn.close()
